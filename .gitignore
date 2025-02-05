@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+dist/
+*.tsbuildinfo
+
+# Prisma
+prisma/.env
+.env
+
+# Logs
+logs/
+*.log
+*.log.*
+log/
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# Entorno de Pruebas
+coverage/
+
+# Dependencias de Docker (opcional si usas Docker)
+docker-compose.override.yml
