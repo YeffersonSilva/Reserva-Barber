@@ -8,36 +8,42 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String
-  phone       String
-  email       String     @unique
-  password    String
+  id           Int           @id @default(autoincrement())
+  name         String
+  phone        String
+  email        String        @unique
+  password     String
+  role         Role
   reservations Reservation[]
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 model Service {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  duration    Int        // Duración en minutos
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  price        Float
+  duration     Int // Duración en minutos
   reservations Reservation[]
 }
 
 model Reservation {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  serviceId   Int
-  dateTime    DateTime
-  status      ReservationStatus @default(SCHEDULED)
+  id        Int               @id @default(autoincrement())
+  userId    Int
+  serviceId Int
+  dateTime  DateTime
+  status    ReservationStatus @default(SCHEDULED)
 
-  user        User       @relation(fields: [userId], references: [id])
-  service     Service    @relation(fields: [serviceId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
 }
 
 enum ReservationStatus {
-  SCHEDULED   // Reserva programada
-  COMPLETED   // Reserva completada
-  CANCELED    // Reserva cancelada
+  SCHEDULED // Reserva programada
+  COMPLETED // Reserva completada
+  CANCELED // Reserva cancelada
 }

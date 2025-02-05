@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isValidCpf } from '../../../utils/cpf'; // Asegúrate de que la ruta sea correcta
+
 
 export const RegisterUserSchema = z.object({
   name: z.string().nonempty('Name is required'),
