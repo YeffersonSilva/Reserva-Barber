@@ -6,7 +6,6 @@ export class User {
     public email: string,
     public password: string,
     public phone: string | null,
-   
     public role: 'ADMIN' | 'USER',
     public createdAt = new Date(),
     public updatedAt = new Date(),
