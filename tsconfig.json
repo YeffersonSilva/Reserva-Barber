@@ -7,6 +7,9 @@
     "skipLibCheck": true,
     "outDir": "./dist"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "src/types/express/index.d.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
