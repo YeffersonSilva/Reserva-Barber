@@ -47,3 +47,23 @@ enum ReservationStatus {
   COMPLETED // Reserva completada
   CANCELED // Reserva cancelada
 }
+
+// Agregar el enum para los días de la semana
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model OperatingHour {
+  id        Int       @id @default(autoincrement())
+  dayOfWeek DayOfWeek
+  openTime  String    // Puedes usar el tipo "String" para almacenar la hora en formato "HH:mm" o similar
+  closeTime String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
