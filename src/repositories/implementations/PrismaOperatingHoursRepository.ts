@@ -16,8 +16,7 @@ export class PrismaOperatingHoursRepository implements IOperatingHoursRepository
       created.dayOfWeek,
       created.openTime,
       created.closeTime,
-      created.createdAt,
-      created.updatedAt
+   
     );
   }
 
@@ -31,8 +30,7 @@ export class PrismaOperatingHoursRepository implements IOperatingHoursRepository
       found.dayOfWeek,
       found.openTime,
       found.closeTime,
-      found.createdAt,
-      found.updatedAt
+    
     );
   }
 
@@ -43,8 +41,7 @@ export class PrismaOperatingHoursRepository implements IOperatingHoursRepository
       h.dayOfWeek,
       h.openTime,
       h.closeTime,
-      h.createdAt,
-      h.updatedAt
+      
     ));
   }
 
@@ -62,8 +59,7 @@ export class PrismaOperatingHoursRepository implements IOperatingHoursRepository
       updated.dayOfWeek,
       updated.openTime,
       updated.closeTime,
-      updated.createdAt,
-      updated.updatedAt
+   
     );
   }
 
