@@ -81,4 +81,47 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
   async delete(id: number): Promise<void> {
     await prisma.appointment.delete({ where: { id } });
   }
+
+  async findByUserId(userId: number): Promise<Appointment[]> {
+    const appointments = await prisma.appointment.findMany({ where: { userId } });
+    return appointments.map(a => new Appointment(
+      a.id,
+      a.userId,
+      a.companyId,
+      a.serviceId,
+      a.employeeId,
+      a.dateTime,
+      a.status,
+      a.createdAt,
+      a.updatedAt
+    ));
+  }
+
+  async findAllWithFilters(companyId: number, filters: { date?: string; status?: string }): Promise<Appointment[]> {
+    const whereClause: any = { companyId };
+    if (filters.date) {
+      // Convertir la fecha a inicio y fin del día
+      const date = new Date(filters.date);
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+      whereClause.dateTime = { gte: startOfDay, lte: endOfDay };
+    }
+    if (filters.status) {
+      whereClause.status = filters.status;
+    }
+    const appointments = await prisma.appointment.findMany({
+      where: whereClause,
+    });
+    return appointments.map(a => new Appointment(
+      a.id,
+      a.userId,
+      a.companyId,
+      a.serviceId,
+      a.employeeId,
+      a.dateTime,
+      a.status,
+      a.createdAt,
+      a.updatedAt
+    ));
+  }
 }

@@ -59,4 +59,24 @@ export class SchedulingPageController {
       next(error);
     }
   }
+
+  // Nuevo método para generar y devolver el link personalizado
+  async getLink(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        throw new Error("Información de empresa no encontrada en la solicitud");
+      }
+      const page = await this.schedulingPageService.getSchedulingPageByCompany(companyId);
+      if (!page.slug) {
+        throw new Error("No se ha configurado un slug para la página de agendamiento");
+      }
+      // Usar la variable de entorno FRONTEND_URL como base para el link
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const link = `${baseUrl}/schedule/${page.slug}`;
+      res.status(200).json({ link });
+    } catch (error) {
+      next(error);
+    }
+  }
 }

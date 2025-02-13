@@ -1,3 +1,4 @@
+// src/modules/services/ServiceService.ts
 import { IServiceRepository } from '../../repositories/interfaces/IServiceRepository';
 import { CreateServiceDTO } from './dto/CreateServiceDTO';
 import { UpdateServiceDTO } from './dto/UpdateServiceDTO';
@@ -7,13 +8,14 @@ import { AppError } from '../../error/AppError';
 export class ServiceService {
   constructor(private serviceRepository: IServiceRepository) {}
 
-  async createService(data: CreateServiceDTO): Promise<Service> {
+  async createService(data: CreateServiceDTO, companyId: number): Promise<Service> {
     const service = new Service(
-      0, // El ID se asigna automáticamente
+      0, // ID se genera en la base de datos
+      companyId,
       data.name,
       data.description,
-      data.price,
-      data.duration
+      data.duration,
+      true
     );
     return await this.serviceRepository.create(service);
   }
@@ -26,19 +28,18 @@ export class ServiceService {
     return service;
   }
 
-  async listServices(): Promise<Service[]> {
-    return await this.serviceRepository.findAll();
+  async listServices(companyId: number): Promise<Service[]> {
+    return await this.serviceRepository.findAllByCompany(companyId);
   }
 
   async updateService(id: number, data: UpdateServiceDTO): Promise<Service> {
-    // Validar que el servicio existe
+    // Verificar existencia
     await this.getServiceById(id);
     return await this.serviceRepository.update(id, data);
   }
 
   async deleteService(id: number): Promise<void> {
-    // Validar que el servicio existe
     await this.getServiceById(id);
-    return await this.serviceRepository.delete(id);
+    await this.serviceRepository.delete(id);
   }
 }

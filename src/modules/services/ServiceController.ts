@@ -1,3 +1,4 @@
+// src/modules/services/ServiceController.ts
 import { Request, Response, NextFunction } from 'express';
 import { ServiceService } from './ServiceService';
 import { CreateServiceDTO } from './dto/CreateServiceDTO';
@@ -9,7 +10,11 @@ export class ServiceController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data: CreateServiceDTO = req.body;
-      const service = await this.serviceService.createService(data);
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        throw new Error("Información de empresa no encontrada en la solicitud");
+      }
+      const service = await this.serviceService.createService(data, companyId);
       res.status(201).json(service);
     } catch (error) {
       next(error);
@@ -28,7 +33,11 @@ export class ServiceController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const services = await this.serviceService.listServices();
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        throw new Error("Información de empresa no encontrada en la solicitud");
+      }
+      const services = await this.serviceService.listServices(companyId);
       res.status(200).json(services);
     } catch (error) {
       next(error);

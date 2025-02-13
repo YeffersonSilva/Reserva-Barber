@@ -27,23 +27,5 @@
     }
     
 
-    public async getFirebaseToken(req: Request, res: Response, next: NextFunction): Promise<void> {
-      try {
-        const { id } = req.params;
-        const token = await this.authService.getFirebaseTokens(Number(id));
-        res.status(200).json({ firebaseToken: token });
-      } catch (error) {
-        next(error);
-      }
-    }
 
-    public async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
-      try {
-        const { refreshToken } = req.body;
-        const result = await this.authService.refreshToken(refreshToken);
-        res.status(200).json(result);
-      } catch (error) {
-        next(error);
-      }
-    }
   }
