@@ -65,12 +65,16 @@ model SchedulingPage {
   id             Int             @id @default(autoincrement())
   companyId      Int             @unique
   company        Company         @relation(fields: [companyId], references: [id])
+  slug           String?         @unique
   background     String?
   title          String?
   description    String?
-  // Horarios de funcionamiento para la página de agendamiento
+  customCss      String?
+  customJs       String?
   operatingHours OperatingHour[]
 }
+
+
 
 model OperatingHour {
   id               Int             @id @default(autoincrement())
