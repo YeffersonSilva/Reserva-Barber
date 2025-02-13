@@ -24,7 +24,7 @@ export class PrismaUserRepository implements IUserRepository {
         email: user.email,
         password: user.password,
         role: user.role,
-        phone: user.phone || "default-phone",
+      //  phone: user.phone || "default-phone",
       },
     });
 
@@ -39,7 +39,7 @@ export class PrismaUserRepository implements IUserRepository {
         email: data.email,
         password: data.password,
         role: data.role,
-        phone: data.phone ?? undefined,
+       // phone: data.phone ?? undefined,
       },
     });
 

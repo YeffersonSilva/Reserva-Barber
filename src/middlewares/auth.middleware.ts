@@ -1,3 +1,4 @@
+// src/middlewares/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/token';
 import { AppError } from '../error/AppError';

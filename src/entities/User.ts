@@ -1,4 +1,4 @@
-
+// src/entities/User.ts
 export class User {
   constructor(
     public id: number,
@@ -6,9 +6,9 @@ export class User {
     public email: string,
     public password: string,
     public phone: string | null,
-    public role: 'ADMIN' | 'USER' | 'COMPANY_ADMIN',
+    public role: 'ADMIN' | 'COMPANY_ADMIN' | 'EMPLOYEE' | 'CLIENT',
+    public companyId?: number,  // Propiedad opcional
     public createdAt = new Date(),
     public updatedAt = new Date(),
-
   ) {}
 }
