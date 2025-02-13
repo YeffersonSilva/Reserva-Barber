@@ -15,17 +15,17 @@ const schedulingPageController = new SchedulingPageController(schedulingPageServ
 
 router.use(authMiddleware);
 
-// Crear la página de agendamiento (con posibilidad de personalización completa)
+// Crear la página de agendamiento
 router.post(
   '/',
   validateRoutePayload(CreateSchedulingPageSchema),
   (req, res, next) => schedulingPageController.create(req, res, next)
 );
 
-// Obtener la página de agendamiento de la empresa
+// Obtener la página de agendamiento
 router.get('/', (req, res, next) => schedulingPageController.get(req, res, next));
 
-// Actualizar la configuración de la página de agendamiento
+// Actualizar la página de agendamiento
 router.put(
   '/',
   validateRoutePayload(UpdateSchedulingPageSchema),
@@ -34,5 +34,8 @@ router.put(
 
 // Eliminar la página de agendamiento
 router.delete('/', (req, res, next) => schedulingPageController.delete(req, res, next));
+
+// Obtener el link personalizado para la página de agendamiento
+router.get('/link', (req, res, next) => schedulingPageController.getLink(req, res, next));
 
 export default router;

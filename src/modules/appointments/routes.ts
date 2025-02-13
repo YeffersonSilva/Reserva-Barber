@@ -14,7 +14,7 @@ const appointmentRepository = new PrismaAppointmentRepository();
 const appointmentService = new AppointmentService(appointmentRepository);
 const appointmentController = new AppointmentController(appointmentService);
 
-// Todas las rutas se protegen con el middleware de autenticación
+// Todas las rutas se protegen con authMiddleware
 router.use(authMiddleware);
 
 // Crear una cita
@@ -24,11 +24,13 @@ router.post(
   (req, res, next) => appointmentController.create(req, res, next)
 );
 
-// Obtener cita por ID
-router.get('/:id', (req, res, next) => appointmentController.getById(req, res, next));
-
-// Listar citas filtradas por la empresa del usuario
+// Listar citas (con soporte para filtros a través de query params)
+// Ejemplo: GET /appointments?date=2025-02-14&status=SCHEDULED
+// O GET /appointments?mine=true para listar solo las citas del usuario
 router.get('/', (req, res, next) => appointmentController.list(req, res, next));
+
+// Obtener una cita por ID
+router.get('/:id', (req, res, next) => appointmentController.getById(req, res, next));
 
 // Actualizar una cita
 router.put(
