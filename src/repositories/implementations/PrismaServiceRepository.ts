@@ -14,6 +14,7 @@ export class PrismaServiceRepository implements IServiceRepository {
         active: service.active,
       },
     });
+
     return new Service(
       created.id,
       created.companyId,
@@ -21,7 +22,7 @@ export class PrismaServiceRepository implements IServiceRepository {
       created.description,
       created.duration,
       created.active,
-
+   
     );
   }
 
@@ -37,8 +38,21 @@ export class PrismaServiceRepository implements IServiceRepository {
       found.description,
       found.duration,
       found.active,
-  
+   
     );
+  }
+
+  async findAll(): Promise<Service[]> {
+    const services = await prisma.service.findMany();
+    return services.map(s => new Service(
+      s.id,
+      s.companyId,
+      s.name,
+      s.description,
+      s.duration,
+      s.active,
+  
+    ));
   }
 
   async findAllByCompany(companyId: number): Promise<Service[]> {
@@ -52,7 +66,7 @@ export class PrismaServiceRepository implements IServiceRepository {
       s.description,
       s.duration,
       s.active,
-     
+    
     ));
   }
 
@@ -66,6 +80,7 @@ export class PrismaServiceRepository implements IServiceRepository {
         active: data.active,
       },
     });
+
     return new Service(
       updated.id,
       updated.companyId,
@@ -73,7 +88,7 @@ export class PrismaServiceRepository implements IServiceRepository {
       updated.description,
       updated.duration,
       updated.active,
-   
+    
     );
   }
 

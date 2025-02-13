@@ -8,6 +8,6 @@ export class Service {
     public duration: number,
     public active: boolean = true,
     public createdAt?: Date,
-    public updatedAt?: Date,
+    public updatedAt?: Date
   ) {}
 }

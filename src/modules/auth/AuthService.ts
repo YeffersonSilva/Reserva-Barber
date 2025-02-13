@@ -13,7 +13,9 @@ export class AuthService {
   private readonly accessTokenExpiry = "15m";
   private readonly refreshTokenExpiry = "3d";
 
-  public async register(data: RegisterUserDTO): Promise<{ token: string; refreshToken: string; user: User }> {
+  public async register(
+    data: RegisterUserDTO
+  ): Promise<{ token: string; refreshToken: string; user: User }> {
     const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
       throw new AppError("E-mail já registrado", 400);
@@ -42,24 +44,31 @@ export class AuthService {
     return { token, refreshToken, user };
   }
 
-// Ejemplo en src/modules/auth/AuthService.ts (método login)
-public async login(data: LoginUserDTO): Promise<{ token: string; refreshToken: string; user: User }> {
-  const user = await this.userRepository.findByEmail(data.email);
-  if (!user) {
-    throw new AppError("Credenciais inválidas", 401);
+  // Ejemplo en src/modules/auth/AuthService.ts (método login)
+  public async login(
+    data: LoginUserDTO
+  ): Promise<{ token: string; refreshToken: string; user: User }> {
+    const user = await this.userRepository.findByEmail(data.email);
+    if (!user) {
+      throw new AppError("Credenciais inválidas", 401);
+    }
+
+    const isPasswordValid = await comparePassword(
+      data.password,
+      user.password!
+    );
+    if (!isPasswordValid) {
+      throw new AppError("Credenciais inválidas", 401);
+    }
+
+    const tokenPayload = {
+      id: user.id,
+      role: user.role,
+      companyId: user.companyId,
+    };
+    const token = signToken(tokenPayload, this.accessTokenExpiry);
+    const refreshToken = signToken(tokenPayload, this.refreshTokenExpiry);
+
+    return { token, refreshToken, user };
   }
-
-  const isPasswordValid = await comparePassword(data.password, user.password!);
-  if (!isPasswordValid) {
-    throw new AppError("Credenciais inválidas", 401);
-  }
-
-  // Asegúrate de incluir companyId en el payload, si el usuario lo tiene
-  const payload = { id: user.id, role: user.role, companyId: user.companyId };
-  const token = signToken(payload, this.accessTokenExpiry);
-  const refreshToken = signToken(payload, this.refreshTokenExpiry);
-
-  return { token, refreshToken, user };
-}
-
 }

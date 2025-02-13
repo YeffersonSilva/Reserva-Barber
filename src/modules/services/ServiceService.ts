@@ -10,7 +10,7 @@ export class ServiceService {
 
   async createService(data: CreateServiceDTO, companyId: number): Promise<Service> {
     const service = new Service(
-      0, // ID se genera en la base de datos
+      0, // El ID se asigna automáticamente en la BD
       companyId,
       data.name,
       data.description,
@@ -33,13 +33,12 @@ export class ServiceService {
   }
 
   async updateService(id: number, data: UpdateServiceDTO): Promise<Service> {
-    // Verificar existencia
     await this.getServiceById(id);
     return await this.serviceRepository.update(id, data);
   }
 
   async deleteService(id: number): Promise<void> {
     await this.getServiceById(id);
-    await this.serviceRepository.delete(id);
+    return await this.serviceRepository.delete(id);
   }
 }

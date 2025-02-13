@@ -15,37 +15,35 @@ const serviceRepository = new PrismaServiceRepository();
 const serviceService = new ServiceService(serviceRepository);
 const serviceController = new ServiceController(serviceService);
 
-router.use(authMiddleware);
-
 // Listar servicios de la empresa
-router.get('/', (req, res, next) => serviceController.list(req, res, next));
+router.get('/', authMiddleware, (req, res, next) => serviceController.list(req, res, next));
 
 // Obtener un servicio por ID
-router.get('/:id', (req, res, next) => serviceController.getById(req, res, next));
+router.get('/:id', authMiddleware, (req, res, next) => serviceController.getById(req, res, next));
 
-// Crear un servicio (solo COMPANY_ADMIN o ADMIN)
+// Crear un servicio (solo ADMIN o COMPANY_ADMIN)
 router.post(
   '/',
   authMiddleware,
-  requireRole('COMPANY_ADMIN'),
+  requireRole(['ADMIN', 'COMPANY_ADMIN']),
   validateRoutePayload(CreateServiceSchema),
   (req, res, next) => serviceController.create(req, res, next)
 );
 
-// Actualizar un servicio (solo COMPANY_ADMIN o ADMIN)
+// Actualizar un servicio (solo ADMIN o COMPANY_ADMIN)
 router.put(
   '/:id',
   authMiddleware,
-  requireRole('COMPANY_ADMIN'),
+  requireRole(['ADMIN', 'COMPANY_ADMIN']),
   validateRoutePayload(UpdateServiceSchema),
   (req, res, next) => serviceController.update(req, res, next)
 );
 
-// Eliminar un servicio (solo COMPANY_ADMIN o ADMIN)
+// Eliminar un servicio (solo ADMIN o COMPANY_ADMIN)
 router.delete(
   '/:id',
   authMiddleware,
-  requireRole('COMPANY_ADMIN'),
+  requireRole(['ADMIN', 'COMPANY_ADMIN']),
   (req, res, next) => serviceController.delete(req, res, next)
 );
 
