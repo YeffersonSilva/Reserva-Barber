@@ -1,10 +1,8 @@
-// src/modules/appointments/AppointmentService.ts
 import { IAppointmentRepository } from '../../repositories/interfaces/IAppointmentRepository';
 import { CreateAppointmentDTO } from './dto/CreateAppointmentDTO';
 import { UpdateAppointmentDTO } from './dto/UpdateAppointmentDTO';
 import { Appointment } from '../../entities/Appointment';
 import { AppError } from '../../error/AppError';
-import notificationService from '../../services/notificationService';
 
 export class AppointmentService {
   constructor(private appointmentRepository: IAppointmentRepository) {}
@@ -19,32 +17,17 @@ export class AppointmentService {
       throw new AppError("Fecha y hora inválidas", 400);
     }
 
-    // Se asigna null si data.employeeId es undefined
     const appointment = new Appointment(
-      0, // ID se asigna automáticamente en la BD
+      0, // El ID se genera en la base de datos
       userId,
       companyId,
       data.serviceId,
-      data.employeeId ?? null,
+      data.employeeId ?? null, // Convertir undefined en null
       dateTimeParsed,
       'SCHEDULED'
     );
 
-    const createdAppointment = await this.appointmentRepository.create(appointment);
-
-    // Enviar notificación por email después de crear la cita
-    try {
-      await notificationService.sendEmail({
-        to: 'cliente@example.com', // Reemplaza con el email real del cliente
-        subject: 'Confirmación de Cita',
-        html: `<p>Su cita ha sido programada para el ${dateTimeParsed.toLocaleString()}.</p>`,
-      });
-    } catch (error) {
-      console.error("Error al enviar notificación de cita:", error);
-      // Según la lógica de negocio, puedes optar por propagar el error o continuar
-    }
-
-    return createdAppointment;
+    return await this.appointmentRepository.create(appointment);
   }
 
   async getAppointmentById(id: number): Promise<Appointment> {
@@ -59,14 +42,25 @@ export class AppointmentService {
     return await this.appointmentRepository.findAllByCompany(companyId);
   }
 
-  async updateAppointment(id: number, data: UpdateAppointmentDTO): Promise<Appointment> {
-    await this.getAppointmentById(id); // Verifica que la cita exista
-    const updatedAppointment = await this.appointmentRepository.update(id, data);
-    return updatedAppointment;
+  async listAppointmentsWithFilters(companyId: number, filters: { date?: string; status?: string }): Promise<Appointment[]> {
+    return await this.appointmentRepository.findAllWithFilters(companyId, filters);
   }
 
-  async deleteAppointment(id: number): Promise<void> {
+  async listAppointmentsByUser(userId: number): Promise<Appointment[]> {
+    return await this.appointmentRepository.findByUserId(userId);
+  }
+
+  async updateAppointment(id: number, data: UpdateAppointmentDTO): Promise<Appointment> {
     await this.getAppointmentById(id); // Verifica que la cita exista
+    return await this.appointmentRepository.update(id, data);
+  }
+
+  async deleteAppointment(id: number, userId: number, isAdmin: boolean): Promise<void> {
+    const appointment = await this.getAppointmentById(id);
+    // Permitir eliminación solo si el usuario es admin o es el creador de la cita
+    if (!isAdmin && appointment.userId !== userId) {
+      throw new AppError("No autorizado para eliminar esta cita", 403);
+    }
     await this.appointmentRepository.delete(id);
   }
 }

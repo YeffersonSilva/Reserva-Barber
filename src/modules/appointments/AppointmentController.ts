@@ -9,7 +9,7 @@ export class AppointmentController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data: CreateAppointmentDTO = req.body;
-      // Se asume que el middleware de autenticación agrega `user` al request.
+      // Se asume que el middleware de autenticación añade "user" al request
       const userId = req.user?.id;
       const companyId = req.user?.companyId;
       if (!userId || !companyId) {
@@ -32,13 +32,31 @@ export class AppointmentController {
     }
   }
 
+  // Método actualizado para admitir filtros vía query parameters:
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const companyId = req.user?.companyId;
       if (!companyId) {
         throw new Error("Información de empresa no encontrada en la solicitud");
       }
-      const appointments = await this.appointmentService.listAppointmentsByCompany(companyId);
+      const { date, status, mine } = req.query;
+      let appointments;
+      // Si se pasa "mine=true", listar solo las citas del usuario autenticado
+      if (mine === 'true') {
+        const userId = req.user?.id;
+        if (!userId) {
+          throw new Error("Usuario no encontrado en la solicitud");
+        }
+        appointments = await this.appointmentService.listAppointmentsByUser(userId);
+      } else if (date || status) {
+        // Si se pasan filtros (fecha y/o estado)
+        appointments = await this.appointmentService.listAppointmentsWithFilters(companyId, {
+          date: date ? String(date) : undefined,
+          status: status ? String(status) : undefined,
+        });
+      } else {
+        appointments = await this.appointmentService.listAppointmentsByCompany(companyId);
+      }
       res.status(200).json(appointments);
     } catch (error) {
       next(error);
@@ -59,7 +77,12 @@ export class AppointmentController {
   async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const id = Number(req.params.id);
-      await this.appointmentService.deleteAppointment(id);
+      const userId = req.user?.id;
+      const isAdmin = req.user?.role === 'ADMIN';
+      if (!userId) {
+        throw new Error("Usuario no encontrado en la solicitud");
+      }
+      await this.appointmentService.deleteAppointment(id, userId, isAdmin);
       res.status(204).send();
     } catch (error) {
       next(error);
