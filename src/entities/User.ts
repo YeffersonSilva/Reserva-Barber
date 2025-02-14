@@ -1,4 +1,3 @@
-// src/entities/User.ts
 export class User {
   constructor(
     public id: number,
@@ -12,3 +11,5 @@ export class User {
     public updatedAt = new Date(),
   ) {}
 }
+
+

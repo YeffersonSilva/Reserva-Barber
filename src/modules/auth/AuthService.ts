@@ -71,4 +71,11 @@ export class AuthService {
 
     return { token, refreshToken, user };
   }
+
+  public async updateUserCompany(
+    userId: number,
+    companyId: number
+  ): Promise<void> {
+    await this.userRepository.update(userId, { companyId });
+  }
 }
