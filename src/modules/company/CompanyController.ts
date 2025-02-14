@@ -1,22 +1,38 @@
-import { Request, Response, NextFunction } from 'express';
-import { CompanyService } from './CompanyService';
-import { CreateCompanyDTO } from './dto/CreateCompanyDTO';
-import { UpdateCompanyDTO } from './dto/UpdateCompanyDTO';
+import { Request, Response, NextFunction } from "express";
+import { CompanyService } from "./CompanyService";
+import { CreateCompanyDTO } from "./dto/CreateCompanyDTO";
+import { UpdateCompanyDTO } from "./dto/UpdateCompanyDTO";
+import { AuthService } from "../auth/AuthService";
 
 export class CompanyController {
-  constructor(private companyService: CompanyService) {}
+  constructor(
+    private companyService: CompanyService,
+    private authService: AuthService
+  ) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data: CreateCompanyDTO = req.body;
+      // Crear la empresa
       const company = await this.companyService.createCompany(data);
+
+      // Actualizar el usuario que creó la empresa para asignarle el companyId
+      const userId = req.user?.id;
+      if (userId) {
+        await this.authService.updateUserCompany(userId, company.id);
+      }
+
       res.status(201).json(company);
     } catch (error) {
       next(error);
     }
   }
 
-  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getById(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
     try {
       const id = Number(req.params.id);
       const company = await this.companyService.getCompanyById(id);

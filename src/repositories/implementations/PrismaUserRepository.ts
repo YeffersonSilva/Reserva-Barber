@@ -1,3 +1,4 @@
+// src/repositories/implementations/PrismaUserRepository.ts
 import { PrismaClient } from '@prisma/client';
 import { IUserRepository } from '../interfaces/IUserRepository';
 import { User } from '../../entities/User';
@@ -24,7 +25,10 @@ export class PrismaUserRepository implements IUserRepository {
         email: user.email,
         password: user.password,
         role: user.role,
-      //  phone: user.phone || "default-phone",
+        // Se agrega companyId para vincular el usuario a la empresa.
+        companyId: user.companyId ?? null,
+        // Si deseas utilizar el campo phone, asegúrate de incluirlo (o eliminarlo según el modelo actual)
+        // phone: user.phone || "default-phone",
       },
     });
 
@@ -39,7 +43,9 @@ export class PrismaUserRepository implements IUserRepository {
         email: data.email,
         password: data.password,
         role: data.role,
-       // phone: data.phone ?? undefined,
+        // Actualiza companyId si se provee; de lo contrario se mantiene el valor existente
+        companyId: data.companyId,
+        // phone: data.phone ?? undefined,
       },
     });
 
@@ -64,6 +70,7 @@ export class PrismaUserRepository implements IUserRepository {
       userData.password,
       userData.phone,
       userData.role,
+      userData.companyId,  // Ahora se asigna el valor de companyId
       userData.createdAt,
       userData.updatedAt
     );
