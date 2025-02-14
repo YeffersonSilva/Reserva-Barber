@@ -1,4 +1,5 @@
 // src/modules/services/ServiceService.ts
+import prisma from '../../config/dbConfig'; // Para validar la existencia de la empresa
 import { IServiceRepository } from '../../repositories/interfaces/IServiceRepository';
 import { CreateServiceDTO } from './dto/CreateServiceDTO';
 import { UpdateServiceDTO } from './dto/UpdateServiceDTO';
@@ -9,8 +10,15 @@ export class ServiceService {
   constructor(private serviceRepository: IServiceRepository) {}
 
   async createService(data: CreateServiceDTO, companyId: number): Promise<Service> {
+    // Validar que la empresa existe
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) {
+      throw new AppError("La empresa no existe", 400);
+    }
+
     const service = new Service(
-      0, // El ID se asigna automáticamente en la BD
+      
+      0, // El ID se asigna automáticamente
       companyId,
       data.name,
       data.description,

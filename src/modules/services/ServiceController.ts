@@ -10,9 +10,11 @@ export class ServiceController {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const data: CreateServiceDTO = req.body;
-      const companyId = req.user?.companyId;
-      if (!companyId) {
-        throw new Error("Información de empresa no encontrada en la solicitud");
+      // Extraer companyId y forzarlo a número
+      const rawCompanyId = req.user?.companyId;
+      const companyId = typeof rawCompanyId === 'string' ? parseInt(rawCompanyId, 10) : rawCompanyId;
+      if (!companyId || isNaN(companyId)) {
+        throw new Error("Información de empresa no encontrada o inválida en la solicitud");
       }
       const service = await this.serviceService.createService(data, companyId);
       res.status(201).json(service);
@@ -33,9 +35,10 @@ export class ServiceController {
 
   async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const companyId = req.user?.companyId;
-      if (!companyId) {
-        throw new Error("Información de empresa no encontrada en la solicitud");
+      const rawCompanyId = req.user?.companyId;
+      const companyId = typeof rawCompanyId === 'string' ? parseInt(rawCompanyId, 10) : rawCompanyId;
+      if (!companyId || isNaN(companyId)) {
+        throw new Error("Información de empresa no encontrada o inválida en la solicitud");
       }
       const services = await this.serviceService.listServices(companyId);
       res.status(200).json(services);
