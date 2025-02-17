@@ -1,3 +1,4 @@
+// src/modules/reservations/ReservationService.ts
 import { IReservationRepository } from '../../repositories/interfaces/IReservationRepository';
 import { CreateReservationDTO } from './dto/CreateReservationDTO';
 import { UpdateReservationDTO } from './dto/UpdateReservationDTO';
@@ -7,15 +8,24 @@ import { AppError } from '../../error/AppError';
 export class ReservationService {
   constructor(private reservationRepository: IReservationRepository) {}
 
-  async createReservation(data: CreateReservationDTO, userId: number): Promise<Reservation> {
+  /**
+   * Ahora se requiere además el companyId para crear la reserva.
+   */
+  async createReservation(
+    data: CreateReservationDTO,
+    userId: number,
+    companyId: number
+  ): Promise<Reservation> {
     const dateTimeParsed = new Date(data.dateTime);
     if (isNaN(dateTimeParsed.getTime())) {
       throw new AppError("Fecha y hora inválidas", 400);
     }
 
+    // Se agrega companyId como tercer argumento
     const reservation = new Reservation(
-      0,             // ID se genera en la BD
+      0,             // El ID se genera en la BD
       userId,
+      companyId,     // Nuevo: companyId
       data.serviceId,
       dateTimeParsed,
       'SCHEDULED'    // Estado por defecto
