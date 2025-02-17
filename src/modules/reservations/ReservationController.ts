@@ -6,20 +6,21 @@ import { UpdateReservationDTO } from './dto/UpdateReservationDTO';
 export class ReservationController {
   constructor(private reservationService: ReservationService) {}
 
-  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const data: CreateReservationDTO = req.body;
-      // Se asume que el middleware de autenticación adjunta al request la propiedad "user"
-      const userId = req.user?.id;
-      if (!userId) {
-        throw new Error("Usuario no encontrado en la solicitud");
-      }
-      const reservation = await this.reservationService.createReservation(data, userId);
-      res.status(201).json(reservation);
-    } catch (error) {
-      next(error);
+// Ejemplo en ReservationController.ts
+async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const data: CreateReservationDTO = req.body;
+    const userId = req.user?.id;
+    const companyId = req.user?.companyId;
+    if (!userId || !companyId) {
+      throw new Error("Información del usuario o empresa no encontrada en la solicitud");
     }
+    const reservation = await this.reservationService.createReservation(data, userId, companyId);
+    res.status(201).json(reservation);
+  } catch (error) {
+    next(error);
   }
+}
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {

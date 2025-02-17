@@ -1,3 +1,4 @@
+// src/modules/operatingHours/routes.ts
 import { Router } from 'express';
 import { OperatingHoursController } from './OperatingHoursController';
 import { PrismaOperatingHoursRepository } from '../../repositories/implementations/PrismaOperatingHoursRepository';
@@ -15,19 +16,17 @@ const operatingHoursRepository = new PrismaOperatingHoursRepository();
 const operatingHoursService = new OperatingHoursService(operatingHoursRepository);
 const operatingHoursController = new OperatingHoursController(operatingHoursService);
 
-// Listar todos los horarios (público o protegido según necesidad)
+// Rutas públicas (listar y obtener por ID)
 router.get('/', (req, res, next) => operatingHoursController.list(req, res, next));
-
-// Obtener un horario por ID
 router.get('/:id', (req, res, next) => operatingHoursController.getById(req, res, next));
 
-// Las siguientes rutas requieren autenticación y rol ADMIN
+// Rutas protegidas: requieren autenticación y rol ADMIN
 
 // Crear un horario de funcionamiento
 router.post(
   '/',
   authMiddleware,
-  requireRole('ADMIN'),
+  requireRole(['ADMIN']),
   validateRoutePayload(CreateOperatingHourSchema),
   (req, res, next) => operatingHoursController.create(req, res, next)
 );
@@ -36,7 +35,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
-  requireRole('ADMIN'),
+  requireRole(['ADMIN']),
   validateRoutePayload(UpdateOperatingHourSchema),
   (req, res, next) => operatingHoursController.update(req, res, next)
 );
@@ -45,7 +44,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
-  requireRole('ADMIN'),
+  requireRole(['ADMIN']),
   (req, res, next) => operatingHoursController.delete(req, res, next)
 );
 
