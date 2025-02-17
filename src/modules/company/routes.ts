@@ -28,7 +28,7 @@ const companyController = new CompanyController(companyService, authService);
 router.post(
   '/',
   authMiddleware,
-  requireRole(['ADMIN']),
+  requireRole(['ADMIN']), // Para crear, solo ADMIN (o según tu lógica)
   validateRoutePayload(CreateCompanySchema),
   (req, res, next) => companyController.create(req, res, next)
 );
@@ -36,10 +36,11 @@ router.post(
 router.get('/:id', authMiddleware, (req, res, next) => companyController.getById(req, res, next));
 router.get('/', authMiddleware, (req, res, next) => companyController.list(req, res, next));
 
+// Actualizar: permitimos tanto COMPANY_ADMIN como ADMIN
 router.put(
   '/:id',
   authMiddleware,
-  requireRole(['COMPANY_ADMIN']),
+  requireRole(['COMPANY_ADMIN', 'ADMIN']),
   validateRoutePayload(UpdateCompanySchema),
   (req, res, next) => companyController.update(req, res, next)
 );

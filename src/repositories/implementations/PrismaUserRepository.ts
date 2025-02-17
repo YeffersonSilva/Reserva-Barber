@@ -1,34 +1,30 @@
 // src/repositories/implementations/PrismaUserRepository.ts
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../config/dbConfig';
 import { IUserRepository } from '../interfaces/IUserRepository';
 import { User } from '../../entities/User';
 
 export class PrismaUserRepository implements IUserRepository {
-  private prisma = new PrismaClient();
-
   async findByEmail(email: string): Promise<User | null> {
-    const userData = await this.prisma.user.findUnique({ where: { email } });
+    const userData = await prisma.user.findUnique({ where: { email } });
     if (!userData) return null;
     return this.mapToEntity(userData);
   }
 
   async findById(id: number): Promise<User | null> {
-    const userData = await this.prisma.user.findUnique({ where: { id } });
+    const userData = await prisma.user.findUnique({ where: { id } });
     if (!userData) return null;
     return this.mapToEntity(userData);
   }
 
   async create(user: User): Promise<User> {
-    const createdUser = await this.prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         name: user.name,
         email: user.email,
         password: user.password,
         role: user.role,
-        // Se agrega companyId para vincular el usuario a la empresa.
         companyId: user.companyId ?? null,
-        // Si deseas utilizar el campo phone, asegúrate de incluirlo (o eliminarlo según el modelo actual)
-        // phone: user.phone || "default-phone",
+        // Si deseas utilizar el campo phone, inclúyelo aquí si fuera necesario
       },
     });
 
@@ -36,16 +32,14 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async update(userId: number, data: Partial<User>): Promise<User> {
-    const updatedUser = await this.prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         name: data.name,
         email: data.email,
         password: data.password,
         role: data.role,
-        // Actualiza companyId si se provee; de lo contrario se mantiene el valor existente
         companyId: data.companyId,
-        // phone: data.phone ?? undefined,
       },
     });
 
@@ -53,11 +47,11 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(userId: number): Promise<void> {
-    await this.prisma.user.delete({ where: { id: userId } });
+    await prisma.user.delete({ where: { id: userId } });
   }
 
   async findAll(): Promise<User[]> {
-    const usersData = await this.prisma.user.findMany();
+    const usersData = await prisma.user.findMany();
     return usersData.map(this.mapToEntity);
   }
 
@@ -70,7 +64,7 @@ export class PrismaUserRepository implements IUserRepository {
       userData.password,
       userData.phone,
       userData.role,
-      userData.companyId,  // Ahora se asigna el valor de companyId
+      userData.companyId,
       userData.createdAt,
       userData.updatedAt
     );
