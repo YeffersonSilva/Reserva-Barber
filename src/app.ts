@@ -8,30 +8,52 @@ import {
 } from "./middlewares/RateLimitMiddleware";
 import { sanitizeMiddleware } from "./middlewares/SanitizationMiddleware";
 import { configureSecurityHeaders } from "./middlewares/SecurityHeadersMiddleware";
+import { sqlInjectionPreventionMiddleware } from "./middlewares/SqlInjectionPreventionMiddleware";
+import { xssPreventionMiddleware } from "./middlewares/XssPreventionMiddleware";
+import { ipValidationMiddleware } from "./middlewares/IpValidationMiddleware";
+import { httpMethodValidationMiddleware } from "./middlewares/HttpMethodValidationMiddleware";
+import helmet from "helmet";
+import { csrfProtection, csrfErrorHandler } from "./middlewares/CsrfMiddleware";
+import { parameterPollutionMiddleware } from "./middlewares/ParameterPollutionMiddleware";
+import { jsonValidationMiddleware } from "./middlewares/JsonValidationMiddleware";
+import cookieParser from "cookie-parser";
 
 const app = express();
+
+// Configuraciones básicas
+app.use(helmet());
+app.use(express.json({ limit: "10kb" })); // Limitar tamaño de payload
+app.use(jsonValidationMiddleware);
 
 // Configurar headers de seguridad
 configureSecurityHeaders(app);
 
-// Aplicar rate limiting global
-app.use(rateLimitMiddleware);
+// Middlewares de parseo
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Aplicar sanitización global
-app.use(sanitizeMiddleware);
-
-// Aplicar rate limiting específico para login
-app.use("/api/auth/login", loginLimiter);
-
-// Configura CORS con las opciones necesarias (puedes personalizarlo)
+// Configuración de CORS
 app.use(
   cors({
-    origin(_requestOrigin, callback) {
-      callback(null, true);
-    },
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
   })
 ); // Usar CORS
-app.use(express.json());
+
+// Middlewares de seguridad
+app.use(ipValidationMiddleware);
+app.use(rateLimitMiddleware);
+app.use(sqlInjectionPreventionMiddleware);
+app.use(xssPreventionMiddleware);
+app.use(sanitizeMiddleware);
+app.use(httpMethodValidationMiddleware());
+app.use(cookieParser());
+app.use(csrfProtection);
+app.use(csrfErrorHandler);
+app.use(parameterPollutionMiddleware);
+
+// Rate limiting específico para login
+app.use("/api/auth/login", loginLimiter);
 
 app.use("/", routes);
 app.use(errorHandler);
