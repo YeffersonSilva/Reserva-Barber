@@ -14,4 +14,7 @@ export const envConfig = {
   FRONTEND_URL: process.env.FRONTEND_URL,
   ASAAS_API_URL: process.env.ASAAS_API_URL,
   ASAAS_API_KEY: process.env.ASAAS_API_KEY,
+  REDIS_URL: process.env.REDIS_URL,
+  LOG_LEVEL: process.env.LOG_LEVEL,
+  SECURITY_LOG_PATH: process.env.SECURITY_LOG_PATH,
 };
