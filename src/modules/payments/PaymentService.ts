@@ -31,6 +31,8 @@ export class PaymentService {
         throw new AppError("El monto mínimo es de R$0.50", 400);
       }
 
+      await this.validatePaymentAmount(data.amount, companyId);
+
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount: data.amount,
         currency: "brl",
@@ -218,5 +220,69 @@ export class PaymentService {
         400
       );
     }
+  }
+
+  async validatePaymentAccess(paymentIntentId: string, companyId: number) {
+    const paymentIntent = await this.stripe.paymentIntents.retrieve(
+      paymentIntentId
+    );
+    if (paymentIntent.metadata.companyId !== companyId.toString()) {
+      throw new AppError("No autorizado para acceder a este pago", 403);
+    }
+    return paymentIntent;
+  }
+
+  private async validatePaymentAmount(amount: number, companyId: number) {
+    const DAILY_LIMIT = 10000; // R$100
+    const dailyTotal = await this.getDailyTransactionTotal(companyId);
+
+    if (dailyTotal + amount > DAILY_LIMIT) {
+      throw new AppError("Límite diario excedido", 400);
+    }
+
+    if (amount > 500000) {
+      // R$5000
+      await this.requireAdditionalVerification(amount, companyId);
+    }
+  }
+
+  private async getDailyTransactionTotal(companyId: number): Promise<number> {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const payments = await this.stripe.paymentIntents.list({
+      created: { gte: Math.floor(startOfDay.getTime() / 1000) },
+    });
+
+    // Filtra los pagos del companyId deseado
+    const filteredPayments = payments.data.filter(
+      (payment) => payment.metadata.companyId === companyId.toString()
+    );
+
+    return filteredPayments.reduce(
+      (total, payment) => total + payment.amount,
+      0
+    );
+  }
+
+  private async requireAdditionalVerification(
+    amount: number,
+    companyId: number
+  ) {
+    // Implementar verificación adicional para montos altos
+    await SecurityAuditLogger.logSecurityEvent({
+      type: "SUSPICIOUS_ACTIVITY",
+      userId: 0, // Sistema
+      ip: "system",
+      success: true,
+      details: {
+        action: "high_amount_verification_required",
+        amount,
+        companyId,
+      },
+    });
+
+    // Aquí podrías agregar lógica adicional de verificación
+    // Por ejemplo, enviar email al admin, requerir documentación, etc.
   }
 }

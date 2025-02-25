@@ -7,6 +7,7 @@ import { requireRole } from "../../middlewares/roleMiddleware";
 import validateRoutePayload from "../../middlewares/validateRoutePayload";
 import { CreatePaymentSchema, RefundPaymentSchema } from "./dto/CreatePaymentDTO";
 import express from "express";
+import { paymentRateLimiter } from "./middleware/PaymentRateLimiter";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ const paymentController = new PaymentController(paymentService);
 router.post(
   "/create-payment-intent",
   authMiddleware,
+  paymentRateLimiter,
   validateRoutePayload(CreatePaymentSchema),
   (req, res, next) => paymentController.createPaymentIntent(req, res, next)
 );
