@@ -18,6 +18,17 @@ enum AppointmentStatus {
   SCHEDULED
   COMPLETED
   CANCELED
+  CONFIRMED
+  PAYMENT_FAILED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELED
+  REFUNDED
 }
 
 enum DayOfWeek {
@@ -74,8 +85,6 @@ model SchedulingPage {
   operatingHours OperatingHour[]
 }
 
-
-
 model OperatingHour {
   id               Int             @id @default(autoincrement())
   dayOfWeek        DayOfWeek
@@ -97,17 +106,19 @@ model Service {
 }
 
 model Appointment {
-  id          Int                @id @default(autoincrement())
-  userId      Int
-  user        User               @relation(fields: [userId], references: [id])
-  companyId   Int
-  company     Company            @relation(fields: [companyId], references: [id])
-  serviceId   Int
-  service     Service            @relation(fields: [serviceId], references: [id])
-  employeeId  Int?
-  employee    User?              @relation("EmployeeAppointments", fields: [employeeId], references: [id])
-  dateTime    DateTime
-  status      AppointmentStatus  @default(SCHEDULED)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id              Int              @id @default(autoincrement())
+  userId          Int
+  user            User             @relation(fields: [userId], references: [id])
+  companyId       Int
+  company         Company          @relation(fields: [companyId], references: [id])
+  serviceId       Int
+  service         Service          @relation(fields: [serviceId], references: [id])
+  employeeId      Int?
+  employee        User?            @relation("EmployeeAppointments", fields: [employeeId], references: [id])
+  dateTime        DateTime
+  status          AppointmentStatus
+  paymentStatus   PaymentStatus?
+  paymentIntentId String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
