@@ -5,7 +5,7 @@ export const sanitizeMiddleware = (
   req: Request,
   _res: Response,
   next: NextFunction
-) => {
+): void => {
   const sanitizeValue = (value: any): any => {
     if (typeof value === "string") {
       return sanitizeHtml(value, {
