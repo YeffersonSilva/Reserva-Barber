@@ -10,7 +10,7 @@ import { AppError } from "../../error/AppError";
 export class AuthService {
   constructor(private userRepository: IUserRepository) {}
 
-  private readonly accessTokenExpiry = "15m";
+  private readonly accessTokenExpiry = "3d";
   private readonly refreshTokenExpiry = "3d";
 
   public async register(
