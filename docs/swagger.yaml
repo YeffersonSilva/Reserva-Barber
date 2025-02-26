@@ -1,0 +1,311 @@
+openapi: 3.0.0
+info:
+  title: "API Micro SaaS"
+  version: "1.0.0"
+  description: "API para la gestión de citas y pagos, integrando Stripe, seguridad y detección de fraude."
+servers:
+  - url: "http://localhost:3000"
+    description: "Servidor local"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+paths:
+  /api/payments/create-payment-intent:
+    post:
+      summary: "Crear intento de pago"
+      description: "Crea un intento de pago en Stripe para una cita."
+      tags:
+        - "Pagos"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        description: "Datos para crear el intento de pago."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 1500
+                email:
+                  type: string
+                  example: "cliente@ejemplo.com"
+                appointmentId:
+                  type: number
+                  example: 123
+                description:
+                  type: string
+                  example: "Pago de cita"
+      responses:
+        "200":
+          description: "Intento de pago creado exitosamente."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientSecret:
+                    type: string
+                  customerId:
+                    type: string
+                  paymentIntentId:
+                    type: string
+        "400":
+          description: "Error en la creación del intento de pago."
+
+  /api/auth/register:
+    post:
+      summary: "Registrar usuario"
+      description: "Registra un nuevo usuario en el sistema."
+      tags:
+        - "Autenticación"
+      requestBody:
+        required: true
+        description: "Datos para registrar el usuario."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Juan Perez"
+                email:
+                  type: string
+                  example: "juan.perez@example.com"
+                password:
+                  type: string
+                  example: "secret"
+                role:
+                  type: string
+                  example: "CLIENT"
+                companyId:
+                  type: number
+                  example: 1
+      responses:
+        "201":
+          description: "Usuario registrado exitosamente."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: number
+        "400":
+          description: "Error al registrar el usuario."
+
+  /api/auth/login:
+    post:
+      summary: "Inicio de sesión"
+      description: "Permite a un usuario iniciar sesión y obtener un token JWT."
+      tags:
+        - "Autenticación"
+      requestBody:
+        required: true
+        description: "Credenciales del usuario."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "juan.perez@example.com"
+                password:
+                  type: string
+                  example: "secret"
+      responses:
+        "200":
+          description: "Inicio de sesión exitoso."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+        "401":
+          description: "Credenciales inválidas."
+
+  /api/appointments:
+    get:
+      summary: "Obtener citas"
+      description: "Retorna la lista de citas para el usuario autenticado."
+      tags:
+        - "Citas"
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Lista de citas obtenida exitosamente."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      summary: "Crear cita"
+      description: "Crea una nueva cita en el sistema."
+      tags:
+        - "Citas"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        description: "Datos de la nueva cita."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: number
+                  example: 1
+                companyId:
+                  type: number
+                  example: 1
+                serviceId:
+                  type: number
+                  example: 2
+                employeeId:
+                  type: number
+                  example: 3
+                dateTime:
+                  type: string
+                  format: date-time
+                  example: "2023-10-01T15:00:00Z"
+                status:
+                  type: string
+                  example: "SCHEDULED"
+      responses:
+        "201":
+          description: "Cita creada exitosamente."
+        "400":
+          description: "Error al crear la cita."
+
+  /api/appointments/{appointmentId}:
+    get:
+      summary: "Obtener detalles de una cita"
+      description: "Retorna los detalles de una cita especificada por su ID."
+      tags:
+        - "Citas"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: number
+          description: "ID de la cita"
+      responses:
+        "200":
+          description: "Detalles de la cita obtenidos correctamente."
+        "404":
+          description: "Cita no encontrada."
+    patch:
+      summary: "Actualizar cita"
+      description: "Actualiza los detalles de una cita."
+      tags:
+        - "Citas"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: number
+          description: "ID de la cita"
+      requestBody:
+        required: true
+        description: "Campos a actualizar en la cita."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "COMPLETED"
+      responses:
+        "200":
+          description: "Cita actualizada exitosamente."
+        "400":
+          description: "Error al actualizar la cita."
+        "404":
+          description: "Cita no encontrada."
+
+  /api/company/{companyId}:
+    get:
+      summary: "Obtener información de la empresa"
+      description: "Retorna la información detallada de una empresa por su ID."
+      tags:
+        - "Empresa"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: number
+          description: "ID de la empresa"
+      responses:
+        "200":
+          description: "Información de la empresa obtenida exitosamente."
+        "404":
+          description: "Empresa no encontrada."
+    patch:
+      summary: "Actualizar información de la empresa"
+      description: "Actualiza la información de la empresa especificada por su ID."
+      tags:
+        - "Empresa"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          schema:
+            type: number
+          description: "ID de la empresa"
+      requestBody:
+        required: true
+        description: "Datos a actualizar de la empresa."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Empresa XYZ"
+                logo:
+                  type: string
+                  example: "http://example.com/logo.png"
+                primaryColor:
+                  type: string
+                  example: "#000000"
+                secondaryColor:
+                  type: string
+                  example: "#FFFFFF"
+      responses:
+        "200":
+          description: "Información de la empresa actualizada exitosamente."
+        "400":
+          description: "Error al actualizar la información."
+        "404":
+          description: "Empresa no encontrada."
+# Se pueden añadir aquí más rutas según los endpoints de la API.
