@@ -17,6 +17,7 @@ import { csrfProtection, csrfErrorHandler } from "./middlewares/CsrfMiddleware";
 import { parameterPollutionMiddleware } from "./middlewares/ParameterPollutionMiddleware";
 import { jsonValidationMiddleware } from "./middlewares/JsonValidationMiddleware";
 import cookieParser from "cookie-parser";
+import swaggerSetup from "./config/swagger";
 
 const app = express();
 
@@ -55,7 +56,15 @@ app.use(parameterPollutionMiddleware);
 // Rate limiting específico para login
 app.use("/api/auth/login", loginLimiter);
 
+// Configurar Swagger para documentar la API
+swaggerSetup(app);
+
 app.use("/", routes);
 app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
 
 export default app;
